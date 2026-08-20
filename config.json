@@ -1,0 +1,22 @@
+{
+  "_comentario": "Cole aqui as URLs de busca da OLX exatamente como aparecem no navegador. O robo cuida do resto.",
+
+  "buscas": [
+    {
+      "nome": "TAG Heuer R$ 1.500-7.000",
+      "fonte": "olx",
+      "url": "https://www.olx.com.br/brasil?ps=1500&pe=7000&q=tag+heuer",
+      "excluirPalavras": ["replica", "réplica", "pulseira", "somente a caixa", "so a caixa", "peças", "pecas", "sucata", "conserto", "não funciona", "nao funciona"],
+      "exigirPalavras": ["tag", "heuer", "hauer"],
+      "paginas": 1
+    }
+  ],
+
+  "_comentario_busca2": "Busca 2 e 3: e so duplicar o bloco acima com a URL nova.",
+
+  "opcoes": {
+    "idadeMaximaHoras": 72,
+    "maxAlertasPorRodada": 12,
+    "pausaEntreBuscasSegundos": 4
+  }
+}

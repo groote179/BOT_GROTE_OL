@@ -1,0 +1,65 @@
+name: Robô OLX
+
+on:
+  schedule:
+    # A cada 20 minutos. (Horário do GitHub é UTC, mas como é "a cada 20min" não muda nada.)
+    # Aviso: o agendador do GitHub é "melhor esforço" — em horário de pico pode atrasar
+    # alguns minutos. Como o robô lembra o que já viu, atraso não faz perder anúncio.
+    - cron: '*/20 * * * *'
+  workflow_dispatch: # permite rodar na mão pelo botão "Run workflow"
+
+# Se uma execução ainda estiver rodando, a próxima espera em vez de rodar junto
+# (evita duas rodadas gravando o arquivo de "já vistos" ao mesmo tempo).
+concurrency:
+  group: robo-olx
+  cancel-in-progress: false
+
+permissions:
+  contents: write # necessário para gravar de volta o dados/vistos.json
+
+jobs:
+  buscar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Cache do Chromium
+        uses: actions/cache@v4
+        id: cache-navegador
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Rodar o robô
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node src/index.mjs
+
+      - name: Guardar memória dos anúncios já vistos
+        if: always()
+        run: |
+          git config user.name "robo-olx"
+          git config user.email "robo-olx@users.noreply.github.com"
+          git add dados/vistos.json
+          if git diff --staged --quiet; then
+            echo "Nada novo para guardar."
+          else
+            git commit -m "robô: atualiza anúncios já vistos [skip ci]"
+            # outra execução pode ter gravado antes; puxa e tenta de novo
+            git pull --rebase --autostash origin ${{ github.ref_name }} || true
+            git push
+          fi
