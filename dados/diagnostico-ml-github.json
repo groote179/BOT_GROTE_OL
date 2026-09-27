@@ -1,0 +1,54 @@
+{
+  "ambiente": "GitHub Actions",
+  "quando": "2026-09-27T22:00:59.462Z",
+  "rede": {
+    "ip": "20.120.164.99",
+    "pais": "US",
+    "regiao": "Washington",
+    "provedor": "AS8075 Microsoft Corporation"
+  },
+  "api": {
+    "sites_MLB": {
+      "status": 403,
+      "corpo": "{\"code\":\"PA_UNAUTHORIZED_RESULT_FROM_POLICIES\",\"message\":\"At least one policy returned UNAUTHORIZED.\",\"status\":403,\"bloc"
+    },
+    "busca": {
+      "status": 403,
+      "corpo": "{\"message\":\"forbidden\",\"error\":\"forbidden\",\"status\":403,\"cause\":[]}"
+    },
+    "catalogo": {
+      "status": 403,
+      "corpo": "{\"status\":403,\"message\":\"At least one policy returned UNAUTHORIZED.\",\"blocked_by\":\"PolicyAgent\",\"code\":\"PA_UNAUTHORIZED_"
+    },
+    "domain_discovery": {
+      "status": 200,
+      "corpo": "[{\"domain_id\":\"MLB-WRISTWATCHES\",\"domain_name\":\"Relógios de pulso\",\"category_id\":\"MLB26426\",\"category_name\":\"De Pulso\",\""
+    }
+  },
+  "site": {
+    "home": {
+      "status": 200,
+      "barrado": false,
+      "anuncios": 24,
+      "titulo": "Mercado Livre Brasil - Frete Grátis no mesmo dia"
+    },
+    "listagem": {
+      "status": 200,
+      "barrado": true,
+      "anuncios": 0,
+      "titulo": "Mercado Libre"
+    },
+    "listagem_com_preco": {
+      "status": 200,
+      "barrado": true,
+      "anuncios": 0,
+      "titulo": "Mercado Libre"
+    },
+    "ofertas": {
+      "status": 200,
+      "barrado": false,
+      "anuncios": 48,
+      "titulo": "Ofertas | Mercadolivre Brasil"
+    }
+  }
+}
