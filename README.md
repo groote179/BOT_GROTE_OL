@@ -42,7 +42,7 @@ campos para dizer *o que aceitar*:
 
 | | OLX | Enjoei |
 |---|---|---|
-| O que buscar |  (cole do navegador) |  +  /  |
+| O que buscar | `url` (cole do navegador) | `termo` + `precoMin` / `precoMax` |
 | Precisa de navegador | sim (Chromium) | não (API JSON) |
 | Alcance | 50 por página, mais recentes primeiro | a busca inteira, via paginação |
 | Idade do anúncio | disponível | não informada pelo site |
@@ -157,15 +157,18 @@ estreia silenciosa) já funciona para qualquer fonte.
 ## Sobre o Enjoei
 
 A busca do site é renderizada no navegador, mas por trás existe uma API GraphQL
- chamada por GET, com *persisted
+`enjusearch.enjoei.com.br/graphql-search-x` chamada por GET, com *persisted
 query*. O robô fala direto com ela — sem Chromium, muito mais rápido.
 
 Dois detalhes que moldaram o código:
 
-- **Não dá para ordenar por data.** O parâmetro  existe, mas espera um
+- **Não dá para ordenar por data.** O parâmetro `sort` existe, mas espera um
   objeto GraphQL que o gateway GET não transporta. Em troca, a API informa o
-   e pagina por cursor () — então o robô varre a busca inteira
+  `total` e pagina por cursor (`after`) — então o robô varre a busca inteira
   e deixa a deduplicação por id decidir o que é novo. Nada escapa.
-- **O  é fixo no código.** É o identificador da consulta salva no
+- **O `query_id` é fixo no código.** É o identificador da consulta salva no
   servidor do Enjoei. Se o site for atualizado e esse id mudar, a busca passa a
   voltar vazia — o robô avisa no Telegram, e é o primeiro ponto a checar.
+- **O Enjoei não informa a data do anúncio.** Por isso o filtro
+  `idadeMaximaHoras` não se aplica lá: o que define "novo" é simplesmente o
+  robô nunca ter visto aquele id antes.
