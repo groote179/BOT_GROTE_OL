@@ -56,6 +56,7 @@ e **cole a URL da barra de endereços**:
 | `url` | A busca copiada da OLX. O robô já força a ordenação por mais recentes. |
 | `excluirPalavras` | Se o título tiver **qualquer** uma delas, o anúncio é descartado. |
 | `exigirPalavras` | O título precisa ter **pelo menos uma**. Deixe `[]` para aceitar tudo. |
+| `categoriasPermitidas` | Só aceita anúncios destas categorias. `[8080, 11080, 3140]` = Acessórios, Antiguidades e Smartwatches — onde ficam os relógios. Deixe de fora para aceitar qualquer categoria. |
 | `paginas` | Quantas páginas ler (50 anúncios cada). `1` basta para monitoramento. |
 
 As palavras casam **inteiras e sem acento**: `"tag"` acha `TAG Heuer` e `Tag`,
@@ -116,8 +117,12 @@ Depois disso ele roda sozinho a cada 20 minutos.
   levam HTTP 403 (Cloudflare). Por isso o robô usa Chromium de verdade, com o
   User-Agent ajustado. Se um dia voltar a dar 403, é esse ponto que precisa de
   ajuste — veja `src/navegador.mjs`.
-- A OLX mistura anúncios não relacionados no resultado ("veja também").
-  É para isso que serve o `exigirPalavras`.
+- A OLX mistura anúncios não relacionados no resultado ("veja também"), e a busca
+  por marca pega homônimos: `omega` traz Chevrolet Ômega, peças de carro e até uma
+  vitrine refrigerada. O `categoriasPermitidas` resolve isso melhor que palavra no
+  título, porque "Chevrolet Omega GLS" também contém "omega".
+- Réplicas nem sempre dizem "réplica": aparecem como "clone", "Clean Factory" ou
+  "ETA s/c". Esses termos estão no `excluirPalavras`.
 
 ## Estrutura
 

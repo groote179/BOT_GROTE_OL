@@ -1,19 +1,123 @@
 {
   "_comentario": "Cole aqui as URLs de busca da OLX exatamente como aparecem no navegador. O robo cuida do resto.",
-
+  "_comentario_categorias": "categoriasPermitidas 8080=Acessorios (relogios), 11080=Antiguidades, 3140=Smartwatches. Serve para cortar carro/peca/outros que a OLX mistura no resultado.",
   "buscas": [
     {
       "nome": "TAG Heuer R$ 1.500-7.000",
       "fonte": "olx",
       "url": "https://www.olx.com.br/brasil?ps=1500&pe=7000&q=tag+heuer",
-      "excluirPalavras": ["replica", "réplica", "pulseira", "somente a caixa", "so a caixa", "peças", "pecas", "sucata", "conserto", "não funciona", "nao funciona"],
-      "exigirPalavras": ["tag", "heuer", "hauer"],
+      "exigirPalavras": [
+        "tag",
+        "heuer",
+        "hauer"
+      ],
+      "excluirPalavras": [
+        "replica",
+        "réplica",
+        "somente a caixa",
+        "so a caixa",
+        "peças",
+        "pecas",
+        "sucata",
+        "conserto",
+        "não funciona",
+        "nao funciona",
+        "so a pulseira",
+        "somente pulseira",
+        "apenas pulseira",
+        "pulseira para",
+        "eta",
+        "clone",
+        "clean factory",
+        "super clone",
+        "superclone",
+        "1:1"
+      ],
+      "categoriasPermitidas": [
+        8080,
+        11080,
+        3140
+      ],
+      "paginas": 1
+    },
+    {
+      "nome": "Omega R$ 4.000-15.000",
+      "fonte": "olx",
+      "url": "https://www.olx.com.br/brasil?ps=4000&pe=15000&q=omega",
+      "exigirPalavras": [
+        "omega",
+        "ômega"
+      ],
+      "excluirPalavras": [
+        "replica",
+        "réplica",
+        "somente a caixa",
+        "so a caixa",
+        "peças",
+        "pecas",
+        "sucata",
+        "conserto",
+        "não funciona",
+        "nao funciona",
+        "chevrolet",
+        "gm",
+        "baixo",
+        "vitrine",
+        "so a pulseira",
+        "somente pulseira",
+        "apenas pulseira",
+        "pulseira para",
+        "eta",
+        "clone",
+        "clean factory",
+        "super clone",
+        "superclone",
+        "1:1"
+      ],
+      "categoriasPermitidas": [
+        8080,
+        11080,
+        3140
+      ],
+      "paginas": 1
+    },
+    {
+      "nome": "Breitling R$ 3.000-10.000",
+      "fonte": "olx",
+      "url": "https://www.olx.com.br/brasil?ps=3000&pe=10000&q=breitling",
+      "exigirPalavras": [
+        "breitling"
+      ],
+      "excluirPalavras": [
+        "replica",
+        "réplica",
+        "somente a caixa",
+        "so a caixa",
+        "peças",
+        "pecas",
+        "sucata",
+        "conserto",
+        "não funciona",
+        "nao funciona",
+        "so a pulseira",
+        "somente pulseira",
+        "apenas pulseira",
+        "pulseira para",
+        "eta",
+        "clone",
+        "clean factory",
+        "super clone",
+        "superclone",
+        "1:1"
+      ],
+      "categoriasPermitidas": [
+        8080,
+        11080,
+        3140
+      ],
       "paginas": 1
     }
   ],
-
-  "_comentario_busca2": "Busca 2 e 3: e so duplicar o bloco acima com a URL nova.",
-
   "opcoes": {
     "idadeMaximaHoras": 72,
     "maxAlertasPorRodada": 12,

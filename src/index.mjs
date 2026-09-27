@@ -39,6 +39,13 @@ function contemTermo(texto, termo) {
 function motivoParaDescartar(anuncio, busca, opcoes) {
   const titulo = textoNormalizado(anuncio.titulo);
 
+  // Filtro por categoria: muito mais confiavel que palavra no titulo.
+  // Ex: "Chevrolet Omega GLS" contem "omega", mas esta na categoria de carros.
+  const permitidas = busca.categoriasPermitidas || [];
+  if (permitidas.length && anuncio.categoria != null && !permitidas.includes(anuncio.categoria)) {
+    return `categoria errada: ${anuncio.categoriaNome || anuncio.categoria}`;
+  }
+
   const proibida = (busca.excluirPalavras || []).find((p) => contemTermo(titulo, p));
   if (proibida) return `palavra excluída: "${proibida}"`;
 

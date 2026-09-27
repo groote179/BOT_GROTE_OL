@@ -58,6 +58,8 @@ function padronizar(a) {
     imagem: a.images?.[0]?.original || null,
     idadeHoras: a.lastBumpAgeSecs != null ? Number(a.lastBumpAgeSecs) / 3600 : null,
     profissional: !!a.professionalAd,
+    categoria: a.searchCategoryLevelOne ?? null, // ex: 8080 = Acessorios (onde ficam os relogios)
+    categoriaNome: a.categoryName || null,
     fonte: 'OLX',
   };
 }
