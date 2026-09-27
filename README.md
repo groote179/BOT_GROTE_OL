@@ -1,6 +1,6 @@
-# Robô OLX
+# Robô OLX + Enjoei
 
-Vigia buscas específicas na OLX e avisa no Telegram quando aparece anúncio novo.
+Vigia buscas específicas na **OLX** e no **Enjoei** e avisa no Telegram quando aparece anúncio novo.
 Roda de graça no GitHub Actions, a cada 20 minutos, sem precisar deixar o PC ligado.
 
 ## Como funciona
@@ -35,7 +35,18 @@ Roda de verdade: envia no Telegram e grava a memória.
 > senão você receberia 50 mensagens de uma vez. Da segunda em diante, só novidade.
 > Para forçar o alerta já na primeira: `node src/index.mjs --avisar-tudo`.
 
-## Configuração das buscas (`config.json`)
+## Configuração das buscas ()
+
+As duas fontes usam campos diferentes para dizer *o que* buscar, e os mesmos
+campos para dizer *o que aceitar*:
+
+| | OLX | Enjoei |
+|---|---|---|
+| O que buscar |  (cole do navegador) |  +  /  |
+| Precisa de navegador | sim (Chromium) | não (API JSON) |
+| Alcance | 50 por página, mais recentes primeiro | a busca inteira, via paginação |
+| Idade do anúncio | disponível | não informada pelo site |
+
 
 Faça a busca no site da OLX, ajuste os filtros lá mesmo (preço, região, categoria)
 e **cole a URL da barra de endereços**:
@@ -131,12 +142,30 @@ config.json              suas buscas
 src/index.mjs            orquestra tudo
 src/navegador.mjs        Chromium ajustado para não ser bloqueado
 src/fontes/olx.mjs       lê e padroniza os anúncios da OLX
+src/fontes/enjoei.mjs    o mesmo para o Enjoei (API GraphQL, sem navegador)
 src/notificacao/telegram.mjs
 src/estado.mjs           memória do que já foi visto
 dados/vistos.json        a memória em si
 .github/workflows/robo.yml
 ```
 
-Para acrescentar o **Enjoei** depois: basta criar `src/fontes/enjoei.mjs`
-exportando a mesma função `buscar()` e registrá-lo em `FONTES` no `index.mjs`.
-Todo o resto (filtros, memória, Telegram) já funciona para qualquer fonte.
+Para acrescentar outro site: crie `src/fontes/<nome>.mjs` exportando `nome`,
+`precisaNavegador` e `buscar(busca, ctx)` devolvendo `{ anuncios, total }`, e
+registre em `FONTES` no `index.mjs`. Todo o resto (filtros, memória, Telegram,
+estreia silenciosa) já funciona para qualquer fonte.
+
+## Sobre o Enjoei
+
+A busca do site é renderizada no navegador, mas por trás existe uma API GraphQL
+ chamada por GET, com *persisted
+query*. O robô fala direto com ela — sem Chromium, muito mais rápido.
+
+Dois detalhes que moldaram o código:
+
+- **Não dá para ordenar por data.** O parâmetro  existe, mas espera um
+  objeto GraphQL que o gateway GET não transporta. Em troca, a API informa o
+   e pagina por cursor () — então o robô varre a busca inteira
+  e deixa a deduplicação por id decidir o que é novo. Nada escapa.
+- **O  é fixo no código.** É o identificador da consulta salva no
+  servidor do Enjoei. Se o site for atualizado e esse id mudar, a busca passa a
+  voltar vazia — o robô avisa no Telegram, e é o primeiro ponto a checar.

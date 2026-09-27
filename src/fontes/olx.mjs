@@ -4,6 +4,7 @@
 // ler o visual da pagina, que muda toda hora.
 
 export const nome = 'OLX';
+export const precisaNavegador = true; // a OLX bloqueia requisicao sem navegador
 
 /** Junta os pedacos do payload do Next.js num texto so. */
 function juntarPayload(html) {
@@ -72,13 +73,30 @@ export function montarUrl(urlBase, pagina = 1) {
   return u.toString();
 }
 
-/** Busca uma pagina e devolve a lista padronizada. */
-export async function buscar(navegador, urlBase, pagina = 1) {
-  const html = await navegador.abrir(montarUrl(urlBase, pagina));
-  const anuncios = recortarAnuncios(juntarPayload(html));
+const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  if (anuncios.length === 0) {
-    throw new Error('A pagina abriu mas nenhum anuncio foi lido - a OLX pode ter mudado o formato');
+/** Le as paginas pedidas e devolve tudo no formato padrao do robo. */
+export async function buscar(busca, ctx) {
+  const encontrados = [];
+  const vistos = new Set();
+  const maxPaginas = busca.paginas || 1;
+
+  for (let pagina = 1; pagina <= maxPaginas; pagina++) {
+    const html = await ctx.navegador.abrir(montarUrl(busca.url, pagina));
+    const anuncios = recortarAnuncios(juntarPayload(html));
+
+    if (anuncios.length === 0) {
+      throw new Error('A pagina abriu mas nenhum anuncio foi lido - a OLX pode ter mudado o formato');
+    }
+
+    for (const anuncio of anuncios) {
+      if (vistos.has(anuncio.listId)) continue;
+      vistos.add(anuncio.listId);
+      encontrados.push(padronizar(anuncio));
+    }
+
+    if (pagina < maxPaginas) await dormir(2000);
   }
-  return anuncios.map(padronizar);
+
+  return { anuncios: encontrados, total: null };
 }

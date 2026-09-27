@@ -116,11 +116,114 @@
         3140
       ],
       "paginas": 1
+    },
+    {
+      "nome": "Enjoei — TAG Heuer R$ 1.500-7.000",
+      "fonte": "enjoei",
+      "termo": "tag heuer",
+      "precoMin": 1500,
+      "precoMax": 7000,
+      "exigirPalavras": [
+        "tag",
+        "heuer",
+        "hauer"
+      ],
+      "excluirPalavras": [
+        "replica",
+        "réplica",
+        "somente a caixa",
+        "so a caixa",
+        "peças",
+        "pecas",
+        "sucata",
+        "conserto",
+        "não funciona",
+        "nao funciona",
+        "so a pulseira",
+        "somente pulseira",
+        "apenas pulseira",
+        "pulseira para",
+        "eta",
+        "clone",
+        "clean factory",
+        "super clone",
+        "superclone",
+        "1:1"
+      ],
+      "paginas": 4
+    },
+    {
+      "nome": "Enjoei — Omega R$ 4.000-15.000",
+      "fonte": "enjoei",
+      "termo": "omega",
+      "precoMin": 4000,
+      "precoMax": 15000,
+      "exigirPalavras": [
+        "omega",
+        "ômega"
+      ],
+      "excluirPalavras": [
+        "replica",
+        "réplica",
+        "somente a caixa",
+        "so a caixa",
+        "peças",
+        "pecas",
+        "sucata",
+        "conserto",
+        "não funciona",
+        "nao funciona",
+        "so a pulseira",
+        "somente pulseira",
+        "apenas pulseira",
+        "pulseira para",
+        "eta",
+        "clone",
+        "clean factory",
+        "super clone",
+        "superclone",
+        "1:1"
+      ],
+      "paginas": 4
+    },
+    {
+      "nome": "Enjoei — Breitling R$ 3.000-10.000",
+      "fonte": "enjoei",
+      "termo": "breitling",
+      "precoMin": 3000,
+      "precoMax": 10000,
+      "exigirPalavras": [
+        "breitling"
+      ],
+      "excluirPalavras": [
+        "replica",
+        "réplica",
+        "somente a caixa",
+        "so a caixa",
+        "peças",
+        "pecas",
+        "sucata",
+        "conserto",
+        "não funciona",
+        "nao funciona",
+        "so a pulseira",
+        "somente pulseira",
+        "apenas pulseira",
+        "pulseira para",
+        "eta",
+        "clone",
+        "clean factory",
+        "super clone",
+        "superclone",
+        "1:1"
+      ],
+      "paginas": 4
     }
   ],
   "opcoes": {
     "idadeMaximaHoras": 72,
     "maxAlertasPorRodada": 12,
     "pausaEntreBuscasSegundos": 4
-  }
+  },
+  "_comentario_enjoei": "Buscas do Enjoei usam termo + precoMin/precoMax (nao URL). paginas=4 varre ate 200 itens."
 }

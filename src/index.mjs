@@ -7,10 +7,11 @@ try { process.loadEnvFile('.env'); } catch { /* sem .env: segue o jogo */ }
 
 import { abrirNavegador } from './navegador.mjs';
 import * as olx from './fontes/olx.mjs';
+import * as enjoei from './fontes/enjoei.mjs';
 import * as estadoDb from './estado.mjs';
 import * as telegram from './notificacao/telegram.mjs';
 
-const FONTES = { olx };
+const FONTES = { olx, enjoei };
 
 // --modo-teste: nao envia nada, so mostra o que faria
 const MODO_TESTE = process.argv.includes('--modo-teste');
@@ -75,37 +76,51 @@ async function principal() {
     log('AVISO: TELEGRAM_TOKEN / TELEGRAM_CHAT_ID não configurados — rodando sem enviar alertas.');
   }
 
-  const navegador = await abrirNavegador();
   const novidades = [];
   const problemas = [];
 
+  // O navegador so e aberto se alguma busca precisar dele (a OLX precisa, o
+  // Enjoei nao). Assim uma rodada so de Enjoei nem carrega o Chromium.
+  const ctx = { navegador: null };
+  const precisaNavegador = config.buscas.some((b) => FONTES[b.fonte || 'olx']?.precisaNavegador);
+
   try {
+    if (precisaNavegador) {
+      log('Abrindo o navegador (necessário para a OLX)...');
+      ctx.navegador = await abrirNavegador();
+    }
+
     for (const busca of config.buscas) {
       const fonte = FONTES[busca.fonte || 'olx'];
       if (!fonte) { problemas.push(`Fonte desconhecida em "${busca.nome}": ${busca.fonte}`); continue; }
 
-      log(`Buscando: ${busca.nome}`);
+      // Busca recem-adicionada: registra o acervo atual calado, como na estreia.
+      const estreando = estadoDb.buscaEhNova(estado, busca.nome) && !AVISAR_TUDO;
+
+      log(`Buscando: ${busca.nome}  [${fonte.nome}]${estreando ? '  (estreia: não vai alertar)' : ''}`);
       let achadosNaBusca = 0;
 
       try {
-        for (let pagina = 1; pagina <= (busca.paginas || 1); pagina++) {
-          const anuncios = await fonte.buscar(navegador, busca.url, pagina);
-          log(`  página ${pagina}: ${anuncios.length} anúncios lidos`);
+        const { anuncios, total } = await fonte.buscar(busca, ctx);
+        log(`  ${anuncios.length} anúncios lidos${total != null ? ` (de ${total} no total)` : ''}`);
 
-          for (const anuncio of anuncios) {
-            if (estadoDb.jaVisto(estado, anuncio.id)) continue;
-            estadoDb.marcarVisto(estado, anuncio.id);
+        for (const anuncio of anuncios) {
+          if (estadoDb.jaVisto(estado, anuncio.id)) continue;
+          estadoDb.marcarVisto(estado, anuncio.id);
 
-            const motivo = motivoParaDescartar(anuncio, busca, opcoes);
-            if (motivo) { log(`    ✗ ${anuncio.titulo.slice(0, 40)} — ${motivo}`); continue; }
+          const motivo = motivoParaDescartar(anuncio, busca, opcoes);
+          if (motivo) { log(`    ✗ ${anuncio.titulo.slice(0, 40)} — ${motivo}`); continue; }
 
-            achadosNaBusca++;
-            novidades.push({ anuncio, nomeBusca: busca.nome });
-            log(`    ★ NOVO: ${anuncio.precoTexto} — ${anuncio.titulo.slice(0, 45)}`);
-          }
-          if (pagina < (busca.paginas || 1)) await dormir(2);
+          achadosNaBusca++;
+          if (estreando) continue; // ja ficou marcado como visto; so nao avisa
+          novidades.push({ anuncio, nomeBusca: busca.nome });
+          log(`    ★ NOVO: ${anuncio.precoTexto} — ${anuncio.titulo.slice(0, 45)}`);
         }
-        log(`  → ${achadosNaBusca} novidade(s) nesta busca`);
+
+        estadoDb.marcarBuscaConhecida(estado, busca.nome);
+        log(estreando
+          ? `  → ${achadosNaBusca} anúncio(s) registrados em silêncio (alertas começam na próxima rodada)`
+          : `  → ${achadosNaBusca} novidade(s) nesta busca`);
       } catch (erro) {
         problemas.push(`Busca "${busca.nome}": ${erro.message}`);
         log(`  ERRO: ${erro.message}`);
@@ -114,7 +129,7 @@ async function principal() {
       await dormir(opcoes.pausaEntreBuscasSegundos ?? 4);
     }
   } finally {
-    await navegador.fechar();
+    if (ctx.navegador) await ctx.navegador.fechar();
   }
 
   // Na primeira execucao so registra, pra nao disparar 50 mensagens de uma vez.

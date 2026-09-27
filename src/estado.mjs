@@ -14,9 +14,13 @@ export function carregar() {
       primeiraVez: !dados.ultimaExecucao,
       vistos: dados.vistos || {},
       ultimaExecucao: dados.ultimaExecucao || null,
+      // Buscas que ja rodaram alguma vez. Uma busca recem-adicionada tambem
+      // merece estreia silenciosa, senao acrescentar uma marca nova despeja
+      // centenas de anuncios antigos no Telegram de uma vez.
+      buscasConhecidas: dados.buscasConhecidas || [],
     };
   } catch {
-    return { primeiraVez: true, vistos: {}, ultimaExecucao: null };
+    return { primeiraVez: true, vistos: {}, ultimaExecucao: null, buscasConhecidas: [] };
   }
 }
 
@@ -31,7 +35,12 @@ export function salvar(estado) {
   fs.mkdirSync(path.dirname(ARQUIVO), { recursive: true });
   fs.writeFileSync(
     ARQUIVO,
-    JSON.stringify({ ultimaExecucao: new Date().toISOString(), total: Object.keys(vistos).length, vistos }, null, 2)
+    JSON.stringify({
+      ultimaExecucao: new Date().toISOString(),
+      total: Object.keys(vistos).length,
+      buscasConhecidas: estado.buscasConhecidas,
+      vistos,
+    }, null, 2)
   );
 }
 
@@ -41,4 +50,13 @@ export function jaVisto(estado, id) {
 
 export function marcarVisto(estado, id) {
   estado.vistos[id] = Date.now();
+}
+
+/** Uma busca que nunca rodou tambem ganha estreia silenciosa. */
+export function buscaEhNova(estado, nomeDaBusca) {
+  return !estado.buscasConhecidas.includes(nomeDaBusca);
+}
+
+export function marcarBuscaConhecida(estado, nomeDaBusca) {
+  if (buscaEhNova(estado, nomeDaBusca)) estado.buscasConhecidas.push(nomeDaBusca);
 }
