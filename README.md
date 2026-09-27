@@ -21,6 +21,12 @@ npm run teste
 Roda sem enviar nada e sem gravar nada. Use para ajustar filtros à vontade.
 
 ```bash
+npm run testar-telegram
+```
+Envia uma mensagem de exemplo para conferir se o bot do Telegram está certo.
+Não consulta a OLX e não mexe na memória.
+
+```bash
 npm start
 ```
 Roda de verdade: envia no Telegram e grava a memória.

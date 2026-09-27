@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.mjs",
-    "teste": "node src/index.mjs --modo-teste"
+    "teste": "node src/index.mjs --modo-teste",
+    "testar-telegram": "node src/testar-telegram.mjs"
   },
   "keywords": [],
   "author": "",
