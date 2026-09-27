@@ -36,8 +36,12 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
-      - name: Rodar o diagnóstico
-        run: node ferramentas/diagnostico-ml.mjs
+      # Monitor virtual: deixa o Chrome rodar "com janela" num servidor sem tela.
+      # O Google Chrome ja vem instalado nos runners ubuntu-latest.
+      - run: sudo apt-get install -y xvfb
+
+      - name: Rodar o diagnóstico (Chrome numa tela virtual)
+        run: xvfb-run -a --server-args="-screen 0 1536x864x24" node ferramentas/diagnostico-ml.mjs
 
       - name: Publicar o resultado no repositório
         if: always()
