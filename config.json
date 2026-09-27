@@ -222,7 +222,7 @@
   ],
   "opcoes": {
     "idadeMaximaHoras": 72,
-    "maxAlertasPorRodada": 12,
+    "maxAlertasPorRodada": 20,
     "pausaEntreBuscasSegundos": 4
   },
   "_comentario_enjoei": "Buscas do Enjoei usam termo + precoMin/precoMax (nao URL). paginas=4 varre ate 200 itens."

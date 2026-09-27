@@ -176,6 +176,24 @@ async function principal() {
     }
     log(`MODO TESTE: nada enviado, nada gravado. (${novidades.length} mensagens seriam montadas)`);
   } else {
+    // Sinal de vida: UMA mensagem por dia, na primeira rodada depois das 8h (horario
+    // de Sao Paulo). Cobre o unico defeito que nenhum alerta pega: o robo nao rodar.
+    // Se a mensagem da manha nao vier, algo travou (agendador, permissao, conta).
+    const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' }); // AAAA-MM-DD
+    const hora = Number(new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Sao_Paulo', hour: '2-digit', hour12: false }));
+    if (telegram.estaConfigurado() && estado.ultimoSinalDeVida !== hoje && hora >= 8) {
+      const [ano, mes, dia] = hoje.split('-');
+      const buscasOk = config.buscas.length - problemas.length;
+      await telegram
+        .enviarAviso(
+          `✅ <b>Robô ativo</b> — ${dia}/${mes}/${ano}\n` +
+          `${buscasOk} de ${config.buscas.length} buscas OK · ${Object.keys(estado.vistos).length} anúncios na memória` +
+          (novidades.length ? ` · ${novidades.length} novidade(s) nesta rodada` : ''),
+        )
+        .then(() => { estado.ultimoSinalDeVida = hoje; log('Sinal de vida enviado.'); })
+        .catch((e) => log('Nao consegui enviar o sinal de vida:', e.message));
+    }
+
     estadoDb.salvar(estado);
   }
   log(`Fim. ${novidades.length} novidade(s) | ${Object.keys(estado.vistos).length} anúncios na memória.`);
@@ -184,7 +202,15 @@ async function principal() {
   if (problemas.length && problemas.length >= config.buscas.length) process.exitCode = 1;
 }
 
-principal().catch((erro) => {
+principal().catch(async (erro) => {
   console.error('ERRO FATAL:', erro);
+  // Erro antes/fora das buscas (navegador nao abriu, config.json invalido...):
+  // ainda assim tenta avisar no Telegram, senao so o e-mail do GitHub contaria.
+  if (!MODO_TESTE && telegram.estaConfigurado()) {
+    await telegram
+      .enviarAviso(`🛑 <b>Robô parou antes de buscar</b>\n${String(erro.message || erro).slice(0, 500)}`)
+      .then(() => console.error('Aviso de erro enviado no Telegram.'))
+      .catch((e) => console.error('Nao consegui avisar no Telegram:', e.message));
+  }
   process.exit(1);
 });

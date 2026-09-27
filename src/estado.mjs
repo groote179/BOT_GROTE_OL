@@ -18,9 +18,11 @@ export function carregar() {
       // merece estreia silenciosa, senao acrescentar uma marca nova despeja
       // centenas de anuncios antigos no Telegram de uma vez.
       buscasConhecidas: dados.buscasConhecidas || [],
+      // Dia (AAAA-MM-DD) do ultimo "sinal de vida" enviado no Telegram.
+      ultimoSinalDeVida: dados.ultimoSinalDeVida || null,
     };
   } catch {
-    return { primeiraVez: true, vistos: {}, ultimaExecucao: null, buscasConhecidas: [] };
+    return { primeiraVez: true, vistos: {}, ultimaExecucao: null, buscasConhecidas: [], ultimoSinalDeVida: null };
   }
 }
 
@@ -39,6 +41,7 @@ export function salvar(estado) {
       ultimaExecucao: new Date().toISOString(),
       total: Object.keys(vistos).length,
       buscasConhecidas: estado.buscasConhecidas,
+      ultimoSinalDeVida: estado.ultimoSinalDeVida,
       vistos,
     }, null, 2)
   );
