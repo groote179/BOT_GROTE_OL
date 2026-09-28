@@ -77,7 +77,8 @@ async function principal() {
   }
 
   const novidades = [];
-  const problemas = [];
+  const problemas = []; // linhas de log/e-mail: TODA falha entra aqui, sem cooldown
+  const problemasParaAvisar = []; // subconjunto que efetivamente vai virar mensagem no Telegram
 
   // O navegador so e aberto se alguma busca precisar dele (a OLX precisa, o
   // Enjoei nao). Assim uma rodada so de Enjoei nem carrega o Chromium.
@@ -92,7 +93,12 @@ async function principal() {
 
     for (const busca of config.buscas) {
       const fonte = FONTES[busca.fonte || 'olx'];
-      if (!fonte) { problemas.push(`Fonte desconhecida em "${busca.nome}": ${busca.fonte}`); continue; }
+      if (!fonte) {
+        const msg = `Fonte desconhecida em "${busca.nome}": ${busca.fonte}`;
+        problemas.push(msg);
+        if (estadoDb.podeAvisarErro(estado, busca.nome)) { problemasParaAvisar.push(msg); estadoDb.marcarAvisoDeErro(estado, busca.nome); }
+        continue;
+      }
 
       // Busca recem-adicionada: registra o acervo atual calado, como na estreia.
       const estreando = estadoDb.buscaEhNova(estado, busca.nome) && !AVISAR_TUDO;
@@ -118,12 +124,22 @@ async function principal() {
         }
 
         estadoDb.marcarBuscaConhecida(estado, busca.nome);
+        estadoDb.limparAvisoDeErro(estado, busca.nome); // voltou a funcionar: reseta o cooldown de aviso
         log(estreando
           ? `  → ${achadosNaBusca} anúncio(s) registrados em silêncio (alertas começam na próxima rodada)`
           : `  → ${achadosNaBusca} novidade(s) nesta busca`);
       } catch (erro) {
-        problemas.push(`Busca "${busca.nome}": ${erro.message}`);
+        const msg = `Busca "${busca.nome}": ${erro.message}`;
+        problemas.push(msg);
         log(`  ERRO: ${erro.message}`);
+        // So repete o aviso no Telegram 1x por hora por busca - senao uma
+        // madrugada ruim da OLX vira uma dezena de mensagens identicas.
+        if (estadoDb.podeAvisarErro(estado, busca.nome)) {
+          problemasParaAvisar.push(msg);
+          estadoDb.marcarAvisoDeErro(estado, busca.nome);
+        } else {
+          log('  (aviso no Telegram represado: ja avisei sobre esta busca na última hora)');
+        }
       }
 
       await dormir(opcoes.pausaEntreBuscasSegundos ?? 4);
@@ -155,8 +171,8 @@ async function principal() {
 
   if (problemas.length) {
     log('Problemas:', problemas.join(' | '));
-    if (deveAvisar) {
-      await telegram.enviarAviso(`⚠️ <b>Robô OLX</b>\n${problemas.map((p) => '• ' + p).join('\n')}`).catch(() => {});
+    if (deveAvisar && problemasParaAvisar.length) {
+      await telegram.enviarAviso(`⚠️ <b>Robô OLX</b>\n${problemasParaAvisar.map((p) => '• ' + p).join('\n')}`).catch(() => {});
     }
   }
 

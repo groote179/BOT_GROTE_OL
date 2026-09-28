@@ -1,13 +1,13 @@
 name: Robô OLX
 
 on:
-  schedule:
-    # A cada 20 minutos, nos minutos 7, 27 e 47. Fora dos minutos "redondos" (00/20/40)
-    # de proposito: sao os mais disputados no agendador do GitHub e os que mais atrasam.
-    # Aviso: o agendador do GitHub é "melhor esforço" — em horário de pico pode atrasar
-    # alguns minutos. Como o robô lembra o que já viu, atraso não faz perder anúncio.
-    - cron: '7,27,47 * * * *'
-  workflow_dispatch: # permite rodar na mão pelo botão "Run workflow"
+  # O agendador interno do GitHub (schedule/cron) e "melhor esforco" e nao tem
+  # garantia de horario - no nosso caso levou mais de 2h para engatar a
+  # primeira vez. Por isso o agendamento de verdade e feito por fora, com um
+  # relogio externo (cron-job.org) chamando este workflow_dispatch a cada
+  # 15 minutos. Deixar o "schedule" tambem ligado so criava execucoes
+  # duplicadas e mais carga na OLX sem necessidade.
+  workflow_dispatch: # disparado pelo relogio externo, ou na mao pelo botao "Run workflow"
 
 # Se uma execução ainda estiver rodando, a próxima espera em vez de rodar junto
 # (evita duas rodadas gravando o arquivo de "já vistos" ao mesmo tempo).

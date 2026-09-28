@@ -20,9 +20,12 @@ export function carregar() {
       buscasConhecidas: dados.buscasConhecidas || [],
       // Dia (AAAA-MM-DD) do ultimo "sinal de vida" enviado no Telegram.
       ultimoSinalDeVida: dados.ultimoSinalDeVida || null,
+      // Quando (timestamp) cada busca avisou por ultimo que estava com problema.
+      // Evita repetir o mesmo aviso a cada 15 minutos enquanto o problema persiste.
+      ultimosAvisosDeErro: dados.ultimosAvisosDeErro || {},
     };
   } catch {
-    return { primeiraVez: true, vistos: {}, ultimaExecucao: null, buscasConhecidas: [], ultimoSinalDeVida: null };
+    return { primeiraVez: true, vistos: {}, ultimaExecucao: null, buscasConhecidas: [], ultimoSinalDeVida: null, ultimosAvisosDeErro: {} };
   }
 }
 
@@ -42,6 +45,7 @@ export function salvar(estado) {
       total: Object.keys(vistos).length,
       buscasConhecidas: estado.buscasConhecidas,
       ultimoSinalDeVida: estado.ultimoSinalDeVida,
+      ultimosAvisosDeErro: estado.ultimosAvisosDeErro,
       vistos,
     }, null, 2)
   );
@@ -62,4 +66,21 @@ export function buscaEhNova(estado, nomeDaBusca) {
 
 export function marcarBuscaConhecida(estado, nomeDaBusca) {
   if (buscaEhNova(estado, nomeDaBusca)) estado.buscasConhecidas.push(nomeDaBusca);
+}
+
+const COOLDOWN_AVISO_ERRO_MS = 60 * 60 * 1000; // 1 hora
+
+/** So deixa avisar de novo sobre a mesma busca quebrada depois de 1 hora. */
+export function podeAvisarErro(estado, nomeDaBusca) {
+  const ultimo = estado.ultimosAvisosDeErro[nomeDaBusca];
+  return !ultimo || Date.now() - ultimo >= COOLDOWN_AVISO_ERRO_MS;
+}
+
+export function marcarAvisoDeErro(estado, nomeDaBusca) {
+  estado.ultimosAvisosDeErro[nomeDaBusca] = Date.now();
+}
+
+/** Limpa o "em cooldown" quando a busca volta a funcionar. */
+export function limparAvisoDeErro(estado, nomeDaBusca) {
+  delete estado.ultimosAvisosDeErro[nomeDaBusca];
 }

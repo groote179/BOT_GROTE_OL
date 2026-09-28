@@ -75,6 +75,27 @@ export function montarUrl(urlBase, pagina = 1) {
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Abre a pagina com ate 2 tentativas extras. HTTP 504 (gateway timeout) e
+ * quase sempre lentidao passageira do lado da OLX, nao um problema real -
+ * sem isso, uma rodada de madrugada com a OLX engasgada gerava um aviso no
+ * Telegram a cada 15 minutos ate a coisa se resolver sozinha.
+ */
+async function abrirComTentativas(navegador, url) {
+  const ERROS_PASSAGEIROS = /HTTP (502|503|504)|timeout|ECONNRESET|ETIMEDOUT/i;
+  let ultimoErro;
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    try {
+      return await navegador.abrir(url);
+    } catch (erro) {
+      ultimoErro = erro;
+      if (tentativa === 3 || !ERROS_PASSAGEIROS.test(erro.message)) throw erro;
+      await dormir(5000 * tentativa); // 5s, depois 10s
+    }
+  }
+  throw ultimoErro;
+}
+
 /** Le as paginas pedidas e devolve tudo no formato padrao do robo. */
 export async function buscar(busca, ctx) {
   const encontrados = [];
@@ -82,7 +103,7 @@ export async function buscar(busca, ctx) {
   const maxPaginas = busca.paginas || 1;
 
   for (let pagina = 1; pagina <= maxPaginas; pagina++) {
-    const html = await ctx.navegador.abrir(montarUrl(busca.url, pagina));
+    const html = await abrirComTentativas(ctx.navegador, montarUrl(busca.url, pagina));
     const anuncios = recortarAnuncios(juntarPayload(html));
 
     if (anuncios.length === 0) {
