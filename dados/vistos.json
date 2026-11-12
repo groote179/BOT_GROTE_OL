@@ -1,5 +1,5 @@
 {
-  "ultimaExecucao": "2026-11-12T02:46:04.432Z",
+  "ultimaExecucao": "2026-11-12T03:01:14.633Z",
   "total": 1592,
   "buscasConhecidas": [
     "TAG Heuer R$ 1.500-7.000",
@@ -10,7 +10,11 @@
     "Enjoei — Breitling R$ 3.000-10.000"
   ],
   "ultimoSinalDeVida": "2026-11-11",
-  "ultimosAvisosDeErro": {},
+  "ultimosAvisosDeErro": {
+    "TAG Heuer R$ 1.500-7.000": 1794452444018,
+    "Omega R$ 4.000-15.000": 1794452448092,
+    "Breitling R$ 3.000-10.000": 1794452452191
+  },
   "vistos": {
     "enjoei-152652211": 1791860484624,
     "olx-1543720346": 1791865846306,
